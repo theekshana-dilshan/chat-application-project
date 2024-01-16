@@ -2,6 +2,7 @@ package org.example;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -15,9 +16,9 @@ public class AppInitializer extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        primaryStage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/view/ClientForm.fxml"))));
-        primaryStage.setTitle("Login");
-        /*primaryStage.getIcons().add(new Image("img/logo.png"));*/
+        Parent parent = FXMLLoader.load(getClass().getResource("/view/LoginForm.fxml"));
+        Scene scene = new Scene(parent);
+        primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
         primaryStage.show();
     }
