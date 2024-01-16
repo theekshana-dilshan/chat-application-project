@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="628.0" prefWidth="361.0" style="-fx-background-color: #57606f;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.ClientForm">
+   <children>
+      <ImageView fitHeight="595.0" fitWidth="398.0" layoutY="33.0">
+         <image>
+            <Image url="@../../../../../../../Downloads/0d1d914691b6c540e82133b67e44d746.jpg" />
+         </image>
+      </ImageView>
+      <JFXButton layoutX="337.0" layoutY="579.0" prefHeight="40.0" prefWidth="39.0" style="-fx-background-color: #fa5252; -fx-background-radius: 20px;" textFill="#fa5252" />
+      <Pane prefHeight="66.0" prefWidth="397.0" style="-fx-background-color: #2f3542;">
+         <children>
+            <ImageView fitHeight="35.0" fitWidth="35.0" layoutX="4.0" layoutY="15.0">
+               <image>
+                  <Image url="@../../../../../../../Downloads/icons8-left-arrow-64.png" />
+               </image>
+            </ImageView>
+            <Label alignment="CENTER" contentDisplay="CENTER" layoutX="91.0" layoutY="13.0" prefHeight="22.0" prefWidth="215.0" text="User Name" textFill="WHITE">
+               <font>
+                  <Font name="Arial Black" size="16.0" />
+               </font>
+            </Label>
+            <Label layoutX="174.0" layoutY="36.0" text="Group chat" textFill="WHITE">
+               <font>
+                  <Font name="Arial" size="10.0" />
+               </font>
+            </Label>
+            <JFXButton graphicTextGap="1.0" layoutX="369.0" layoutY="19.0" prefHeight="14.0" prefWidth="24.0" textFill="#2f3542">
+               <graphic>
+                  <ImageView fitHeight="14.0" fitWidth="14.0">
+                     <image>
+                        <Image url="@../../../../../../../Downloads/icons8-menu-vertical-50.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </JFXButton>
+         </children></Pane>
+      <Pane layoutX="28.0" layoutY="579.0" prefHeight="40.0" prefWidth="303.0" style="-fx-background-color: #2f3542; -fx-background-radius: 20px;">
+         <children>
+            <JFXButton layoutX="4.0" layoutY="3.0" prefHeight="34.0" prefWidth="53.0" style="-fx-background-color: #2f3542; -fx-background-radius: 20px;" textFill="#2f3542" />
+            <JFXButton contentDisplay="RIGHT" graphicTextGap="1.0" layoutX="248.0" layoutY="2.0" prefHeight="35.0" prefWidth="42.0" style="-fx-background-color: #2f3542; -fx-background-radius: 20px;" textFill="#2f3542">
+               <graphic>
+                  <ImageView fitHeight="24.0" fitWidth="23.0">
+                     <image>
+                        <Image url="@../../../../../../../Downloads/icons8-attach-50.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </JFXButton>
+            <TextField layoutX="41.0" layoutY="3.0" prefHeight="34.0" prefWidth="208.0" promptText="Type here" style="-fx-background-color: #2f3542;" />
+            <ImageView layoutX="11.0" layoutY="8.0">
+               <image>
+                  <Image url="@../../../../../../../Downloads/icons8-happy-24.png" />
+               </image>
+            </ImageView>
+         </children>
+      </Pane>
+      <ImageView fitHeight="56.0" fitWidth="56.0" layoutX="305.0" layoutY="6.0">
+         <image>
+            <Image url="@../../../../../../../Downloads/360_F_619264680_x2PBdGLF54sFe7kTBtAvZnPyXgvaRw0Y.jpg" />
+         </image>
+      </ImageView>
+      <ImageView fitHeight="56.0" fitWidth="56.0" layoutX="305.0" layoutY="6.0">
+         <image>
+            <Image url="@../../../../../../../Downloads/Untitled%20design%20(3).png" />
+         </image>
+      </ImageView>
+      <Circle fill="#00ff1e" layoutX="351.0" layoutY="54.0" radius="7.0" stroke="BLACK" strokeType="INSIDE" />
+      <ImageView fitHeight="34.0" fitWidth="35.0" layoutX="339.0" layoutY="582.0">
+         <image>
+            <Image url="@../../../../../../../Downloads/icons8-send-button-64%20(1).png" />
+         </image>
+      </ImageView>
+   </children>
+</AnchorPane>
