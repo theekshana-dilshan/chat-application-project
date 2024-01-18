@@ -49,7 +49,7 @@
          </children></Pane>
       <Pane layoutX="28.0" layoutY="579.0" prefHeight="40.0" prefWidth="303.0" style="-fx-background-color: #2f3542; -fx-background-radius: 20px;">
          <children>
-            <JFXButton layoutY="3.0" prefHeight="34.0" prefWidth="53.0" style="-fx-background-color: #2f3542; -fx-background-radius: 20px;" textFill="#2f3542">
+            <JFXButton layoutY="3.0" onAction="#btnImojiOnAction" prefHeight="34.0" prefWidth="53.0" style="-fx-background-color: #2f3542; -fx-background-radius: 20px;" textFill="#2f3542">
                <graphic>
                   <ImageView>
                      <image>
@@ -66,7 +66,10 @@
                   </ImageView>
                </graphic>
             </JFXButton>
-            <TextField layoutX="43.0" layoutY="3.0" prefHeight="34.0" prefWidth="208.0" promptText="Type here" style="-fx-background-color: #2f3542; -fx-text-fill: #ffffff; -fx-prompt-text-fill: #cfcfcf;" />
+            <TextField fx:id="txtMessage" layoutX="41.0" layoutY="3.0" prefHeight="34.0" prefWidth="208.0" promptText="Type here" style="-fx-background-color: #2f3542; -fx-text-fill: #ffffff; -fx-prompt-text-fill: #cfcfcf;">
+               <font>
+                  <Font size="14.0" />
+               </font></TextField>
          </children>
       </Pane>
       <ImageView fitHeight="56.0" fitWidth="56.0" layoutX="308.0" layoutY="6.0">
@@ -104,5 +107,49 @@
             <VBox prefHeight="496.0" prefWidth="338.0" />
          </content>
       </ScrollPane>
+      <AnchorPane fx:id="emojiPane" layoutX="39.0" layoutY="483.0" prefHeight="91.0" prefWidth="178.0" style="-fx-border-color: #2f3542; -fx-border-radius: 10px;">
+         <children>
+            <ImageView fitHeight="26.0" fitWidth="26.0" layoutX="12.0" layoutY="10.0" onMouseClicked="#thumbsUpOnAction">
+               <image>
+                  <Image url="@../img/icons8-thumbs-up-48.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="26.0" fitWidth="26.0" layoutX="93.0" layoutY="10.0" onMouseClicked="#hartOnAction">
+               <image>
+                  <Image url="@../img/icons8-heart-48.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="26.0" fitWidth="26.0" layoutX="132.0" layoutY="10.0" onMouseClicked="#sunglassOnFaceOnAction">
+               <image>
+                  <Image url="@../img/icons8-smiling-face-with-sunglasses-48.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="26.0" fitWidth="26.0" layoutX="12.0" layoutY="53.0" onMouseClicked="#angryMoodOnAction">
+               <image>
+                  <Image url="@../img/icons8-angry-48.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="26.0" fitWidth="26.0" layoutX="132.0" layoutY="53.0" onMouseClicked="#hartFaceOnAction">
+               <image>
+                  <Image url="@../img/icons8-smiling-face-with-heart-eyes-94.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="26.0" fitWidth="26.0" layoutX="52.0" layoutY="54.0" onMouseClicked="#kissOnAction">
+               <image>
+                  <Image url="@../img/icons8-kissing-face-with-smiling-eyes-48.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="26.0" fitWidth="26.0" layoutX="52.0" layoutY="11.0" onMouseClicked="#smileMoodOnAction">
+               <image>
+                  <Image url="@../img/icons8-beaming-face-with-smiling-eyes-48.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="26.0" fitWidth="26.0" layoutX="93.0" layoutY="53.0" onMouseClicked="#laughFaceOnAction">
+               <image>
+                  <Image url="@../img/icons8-face-with-tears-of-joy-48.png" />
+               </image>
+            </ImageView>
+         </children>
+      </AnchorPane>
    </children>
 </AnchorPane>
