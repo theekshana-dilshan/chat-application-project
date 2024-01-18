@@ -38,6 +38,11 @@
             <Image url="@../img/360_F_619264680_x2PBdGLF54sFe7kTBtAvZnPyXgvaRw0Y.jpg" />
          </image>
       </ImageView>
+      <ImageView fitHeight="104.0" fitWidth="104.0" layoutX="146.0" layoutY="271.0">
+         <image>
+            <Image url="@../img/Untitled%20design%20(3).png" />
+         </image>
+      </ImageView>
       <JFXButton graphicTextGap="1.0" layoutX="232.0" layoutY="356.0" onAction="#btnAddPhotoOnAction" prefHeight="38.0" prefWidth="38.0" textFill="#2f3542">
          <graphic>
             <ImageView>
