@@ -17,8 +17,11 @@ public class LoginFormController {
     @FXML
     private JFXTextField txtUserName;
 
+    public static String username;
+
     @FXML
     void btnLoginOnAction(ActionEvent event) throws IOException {
+        setUsername();
         root.getChildren().clear();
         root.getChildren().add(FXMLLoader.load(getClass().getResource("/view/ClientForm.fxml")));
     }
@@ -27,6 +30,10 @@ public class LoginFormController {
     void lblSignupOnAction(MouseEvent event) throws IOException {
         root.getChildren().clear();
         root.getChildren().add(FXMLLoader.load(getClass().getResource("/view/SignUpForm.fxml")));
+    }
+
+    public void setUsername(){
+        username=txtUserName.getText();
     }
 
 }
