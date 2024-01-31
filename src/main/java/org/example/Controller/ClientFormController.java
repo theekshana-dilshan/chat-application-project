@@ -1,12 +1,19 @@
 package org.example.Controller;
 
+import com.mysql.cj.xdevapi.Client;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -21,8 +28,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
@@ -60,51 +71,134 @@ public class ClientFormController implements Initializable {
 
     private File file;
 
+    public String msg;
+
+    public Socket socket;
+
+    public DataInputStream dis;
+
+    public DataOutputStream dos;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        supRoot.setVisible(false);
-        emojiPane.setVisible(!emojiPane.isVisible());
+        //emojiPane hide
+        emojiPane.setVisible(false);
 
-        vBox.setStyle("-fx-background-color: linear-gradient(to bottom, #b1c7f2, #dbbdf2);");
 
+        //Detecting the height changes in the Vbox
+        ChangeListener<Number> heightListener = new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                //Check if the height has changed
+                if (newValue.doubleValue() != oldValue.doubleValue()) {
+                    //Scroll to the last point
+                    scrollPane.setVvalue(1.0);
+                }
+            }
+        };
+
+        // Bind the height of the VBox to the height of the ScrollPane's viewport
+        vBox.heightProperty().addListener(heightListener);
         lblUserName.setText(LoginFormController.username);
+        setLabelWidth(lblUserName, lblUserName.getText());
 
-        try {
-            client = new Client(new Socket("localhost", 3004));
-            System.out.println("Connected to Server");
+        new Thread(() -> {
 
-            if (LoginFormController.username != null) {
+            try {
+                socket = new Socket("localhost", 3000);
+                System.out.println("Client started");
+
                 //adding name of client which join the chat
                 String joinMessage = "You have joined the chat";
-
-                Label text = new Label(joinMessage);
-                text.getStyleClass().add("join-text");
-                HBox hBox = new HBox();
-                hBox.getChildren().add(text);
-                hBox.setAlignment(Pos.CENTER);
+                Label textjoin = new Label(joinMessage);
+                textjoin.getStyleClass().add("join-text");
+                HBox hBoxJoin = new HBox();
+                hBoxJoin.getChildren().add(textjoin);
+                hBoxJoin.setAlignment(Pos.CENTER);
 
                 Platform.runLater(() -> {
-                    vBox.getChildren().add(hBox);
+                    vBox.getChildren().add(hBoxJoin);
 
                     HBox hBox1 = new HBox();
                     hBox1.setPadding(new Insets(5, 5, 5, 10));
                     vBox.getChildren().add(hBox1);
+
+                    // Schedule a task to hide the HBox after 5 seconds
+                    Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(5), event -> {
+                        vBox.getChildren().remove(hBoxJoin);
+                    }));
+                    timeline.play();
+                });
+
+
+                while (true) {
+                    dis = new DataInputStream(socket.getInputStream());
+                    msg = dis.readUTF();
+
+                    //If the message was an image
+                    if (msg.equals("img")) {
+                        handleReceivedImage(dis);
+                    } else {
+                        //If it was a normal msg
+
+                        String serverMessage=msg;
+                        String[] parts = serverMessage.split(": ", 2);
+
+                        String senderName = null;
+                        String messageContent=null;
+
+                        if (parts.length == 2) {
+                            senderName = parts[0];
+                            messageContent = parts[1];
+                        }
+
+                        Text senderText = new Text(senderName+": ");
+                        senderText.setFill(Color.BLACK);
+
+                        HBox hBox = new HBox();
+                        Text text = new Text(messageContent);
+                        text.setFill(Color.color(0.934, 0.945, 0.996));
+                        text.setStyle("-fx-font-size: 14px;");
+                        text.setText(messageContent);
+
+                        TextFlow textFlow = new TextFlow(senderText,text);
+                        textFlow.setStyle("-fx-background-color: linear-gradient(to right, #a8adad, #858c8c);" +
+                                "-fx-font-size: 14px;"+
+                                "-fx-background-radius: 8px;");
+                        textFlow.setPadding(new Insets(5, 10, 8, 10));
+
+                        hBox.setAlignment(Pos.CENTER_LEFT);
+                        hBox.setPadding(new Insets(5, 5, 5, 10));
+                        hBox.getChildren().add(textFlow);
+
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                vBox.getChildren().add(hBox);
+                            }
+                        });
+
+
+                    }
+                }
+
+            } catch (IOException e) {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Error while connecting to the server ! : " + e.getLocalizedMessage());
+                    /*Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
+                    alertStage.getScene().getStylesheets().add(getClass().getResource("/style/notification.css").toExternalForm());
+                    alert.showAndWait();*/
                 });
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Error creating Client ... ");
-        }
+        }).start();
+    }
 
-        vBox.heightProperty().addListener((observable, oldValue, newValue) ->
-                scrollPane.setVvalue(newValue.doubleValue()));
-
-        if (client != null) {
-            client.receiveMessageFromServer(vBox);
-        } else {
-            System.out.println("Client is null");
-        }
+    public void setLabelWidth(Label label, String text) {
+        Text textNode = new Text("Welcome : " + LoginFormController.username + " !");
+        textNode.setFont(label.getFont());
+        double textWidth = textNode.getLayoutBounds().getWidth();
+        label.setPrefWidth(textWidth);
     }
 
     @FXML
@@ -189,152 +283,96 @@ public class ClientFormController implements Initializable {
     }
 
     public void btnSendOnAction(ActionEvent actionEvent) {
-        String messageToSend = txtMessage.getText();
-        if (!(messageToSend.isEmpty())) {
+        if (txtMessage.getText().isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Cannot send empty messages !  ");
+            Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
+            alertStage.getScene().getStylesheets().add(getClass().getResource("/style/notification.css").toExternalForm());
+            alert.showAndWait();
 
-            HBox hBox = new HBox();
-            hBox.setAlignment(Pos.CENTER_RIGHT);
-            hBox.setPadding(new Insets(5, 5, 5, 10));
-
-            Text senderText = new Text("me :  ");
-            senderText.setFill(Color.BLACK); // Set the color for the sender's name
-
-            Text text = new Text(messageToSend);
-            TextFlow textFlow = new TextFlow(senderText,text);
-            textFlow.setStyle(
-                    "-fx-color: rgb(239, 242, 255);" +
-                            "-fx-background-color: linear-gradient(to right, #83e7eb, #3948ed);" +
-                            "-fx-font-size: 14px;" +
-                            "-fx-background-radius: 8px;");
-
-            textFlow.setPadding(new Insets(5, 10, 5, 10));
-            text.setFill(Color.color(0.934, 0.925, 0.996));
-
-
-            hBox.getChildren().addAll(textFlow);
-            vBox.getChildren().add(hBox);
-
-            if (client != null) {
-                client.sendMessageToServer(lblUserName.getText(),messageToSend);
-            } else {
-                System.out.println("Client is null");
-            }
-
-            txtMessage.clear();
-        }
-    }
-
-
-
-    private class Client implements Runnable{
-        private Socket socket;
-        private BufferedReader bufferedReader;
-        private BufferedWriter bufferedWriter;
-
-        public Client(Socket socket) {
-            try{
-                this.socket = socket;
-                this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-
-            }catch(IOException e){
-                System.out.println("Error creating Client!");
-                e.printStackTrace();
-                closeEverything(socket, bufferedReader, bufferedWriter);
-            }
-        }
-
-        private void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter){
-            try{
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-                if (bufferedWriter != null) {
-                    bufferedWriter.close();
-                }
-                if (socket != null) {
-                    socket.close();
-                }
-            }catch(IOException e){
-                e.printStackTrace();
-            }
-        }
-
-        public void sendMessageToServer(String senderName, String messageToServer) {
-            try {
-                // Format the message as "senderName: messageContent"
-                String formattedMessage = senderName + ": " + messageToServer;
-                bufferedWriter.write(formattedMessage);
-                bufferedWriter.newLine();
-                bufferedWriter.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("Error sending message to the Server!");
-                closeEverything(socket, bufferedReader, bufferedWriter);
-            }
-        }
-
-
-        public void receiveMessageFromServer(VBox vbox_messages) {
+        } else {
             new Thread(() -> {
-                try {
-                    while (socket.isConnected()) {
-                        String messageFromServer = bufferedReader.readLine();
-                        if (messageFromServer == null) {
-                            // Handle disconnection gracefully
-                            break;
-                        }
 
-                        // Process text message
-                        String[] parts = messageFromServer.split(": ", 2);
+                HBox hBox = new HBox();
 
-                        if (parts.length == 2) {
-                            String senderName = parts[0];
-                            String messageContent = parts[1];
+                Text text = new Text(txtMessage.getText());
+                text.setFill(Color.color(0.934, 0.945, 0.996));
+                text.setStyle("-fx-font-size: 14px;");
+                text.setText(txtMessage.getText());
 
-                            // Use Platform.runLater to update UI from a non-JavaFX thread
-                            Platform.runLater(() -> addLabel(senderName, messageContent, vbox_messages));
-                        }
+                Text senderText = new Text("me :  ");
+                senderText.setFill(Color.BLACK);
 
+                TextFlow textFlow = new TextFlow(senderText,text);
+                textFlow.setStyle("-fx-color: rgb(239, 242, 255);" +
+                        "-fx-background-color: linear-gradient(to right, #83e7eb, #3948ed);" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-background-radius: 6px;");
+                textFlow.setPadding(new Insets(5, 10, 8, 10));
+
+                hBox.setAlignment(Pos.CENTER_RIGHT);
+                hBox.setPadding(new Insets(5, 5, 5, 10));
+                hBox.getChildren().add(textFlow);
+
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        vBox.getChildren().add(hBox);
                     }
+                });
+                try {
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    dos.writeUTF(txtMessage.getText());
+                    dos.flush();
+                    txtMessage.clear();
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    System.out.println("Error receiving message from the Server!");
-                } finally {
-                    closeEverything(socket, bufferedReader, bufferedWriter);
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Error while sending the message ! : " + e.getLocalizedMessage());
+                    Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
+                    alertStage.getScene().getStylesheets().add(getClass().getResource("/style/notification.css").toExternalForm());
+                    alert.showAndWait();
                 }
             }).start();
         }
+    }
 
-        @Override
-        public void run() {
+    private void handleReceivedImage(DataInputStream dis) {
+        try {
+            //The dis.read() method reads the length of the image data
+            int imageDataLength = dis.readInt();
+            //Creating a byte array using the length of the image data
+            byte[] imageData = new byte[imageDataLength];
+            dis.readFully(imageData);
 
+            //Converting the byte array to a buffered image object
+            ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
+            BufferedImage bufferedImage = ImageIO.read(bais);
+
+            //Convert BufferedImage to JavaFX Image
+            Image image = SwingFXUtils.toFXImage(bufferedImage, null);
+
+            // Create an ImageView with the Image
+            ImageView imageView = new ImageView(image);
+            imageView.setPreserveRatio(true);
+            imageView.setFitWidth(200);
+            imageView.setFitHeight(200);
+
+            //ADD A scroll pane to the image container
+            ScrollPane scrollPane = new ScrollPane();
+            scrollPane.setContent(imageView);
+
+            //Append the ImageView to the imageContainer
+            Platform.runLater(() -> vBox.getChildren().add(imageView));
+        } catch (IOException e) {
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Error while handling the received image: " + e.getLocalizedMessage());
+
+                Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
+                alertStage.getScene().getStylesheets().add(getClass().getResource("/style/notification.css").toExternalForm());
+                alert.showAndWait();
+            });
         }
     }
 
     public static void addLabel(String sender,String messageFromServer, VBox vBox) {
-        HBox hBox = new HBox();
-        hBox.setAlignment(Pos.CENTER_LEFT);
-        hBox.setPadding(new Insets(5, 5, 5, 10));
 
-        name=sender;
-
-
-        Text senderText = new Text( sender+ " :  ");
-        senderText.setFill(Color.BLACK); // Set the color for the sender's name
-
-        Text messageText = new Text(messageFromServer);
-        messageText.setFill(Color.WHITE);
-        TextFlow textFlow = new TextFlow(senderText, messageText);
-
-        textFlow.setStyle(
-                "-fx-background-color: linear-gradient(to right, #a8adad, #858c8c);" +
-                        "-fx-font-size: 14px;"+
-                        "-fx-background-radius: 8px;");
-
-        textFlow.setPadding(new Insets(5, 10, 5, 10));
-        hBox.getChildren().add(textFlow);
-
-        Platform.runLater(() -> vBox.getChildren().add(hBox));
     }
 }

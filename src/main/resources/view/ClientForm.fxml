@@ -14,20 +14,20 @@
 
 <AnchorPane fx:id="root" prefHeight="628.0" prefWidth="361.0" style="-fx-background-color: #57606f;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.ClientFormController">
    <children>
-      <ImageView fx:id="imgWallpaper" fitHeight="602.0" fitWidth="398.0" layoutY="26.0">
+      <ImageView fx:id="imgWallpaper" fitHeight="628.0" fitWidth="398.0">
          <image>
-            <Image url="@../img/0d1d914691b6c540e82133b67e44d746.jpg" />
+            <Image url="@../img/Navy%20and%20Blue%20Minimalist%20Cyber%20Monday%20Instagram%20Story.png" />
          </image>
       </ImageView>
       <JFXButton layoutX="337.0" layoutY="579.0" onAction="#btnSendOnAction" prefHeight="40.0" prefWidth="39.0" style="-fx-background-color: #fa5252; -fx-background-radius: 20px;" textFill="#fa5252" />
-      <Pane prefHeight="66.0" prefWidth="397.0" style="-fx-background-color: #2f3542;">
+      <Pane prefHeight="66.0" prefWidth="397.0" style="-fx-background-color: #2f3542; -fx-border-color: #424a5b;">
          <children>
-            <Label fx:id="lblUserName" alignment="CENTER" contentDisplay="CENTER" layoutX="91.0" layoutY="13.0" prefHeight="22.0" prefWidth="215.0" text="User Name" textFill="WHITE">
+            <Label fx:id="lblUserName" alignment="CENTER" contentDisplay="TOP" layoutX="91.0" layoutY="13.0" prefHeight="22.0" prefWidth="215.0" text="User Name" textFill="WHITE">
                <font>
                   <Font name="Arial Black" size="16.0" />
                </font>
             </Label>
-            <Label layoutX="174.0" layoutY="36.0" text="Group chat" textFill="#cfcfcf">
+            <Label layoutX="173.0" layoutY="38.0" text="Group chat" textFill="#cfcfcf">
                <font>
                   <Font name="Arial" size="10.0" />
                </font>
