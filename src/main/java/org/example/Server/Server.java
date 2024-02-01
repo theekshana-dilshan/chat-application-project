@@ -149,7 +149,7 @@ public class Server {
                 DataOutputStream dos = new DataOutputStream(s.getOutputStream());
                 //Since socketArray index == clientsNames array client name index
                 index = socketArrayList.indexOf(socket);
-                dos.writeUTF(LoginFormController.clientsNames.get(index) + " : " + msg);
+               // dos.writeUTF(LoginFormController.clientsNames.get(index) + " : " + msg);
                 dos.flush();
             } catch (IOException e) {
                 Platform.runLater(() -> {
@@ -172,7 +172,7 @@ public class Server {
             }
             try {
                 DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-                dos.writeUTF(LoginFormController.clientsNames.get(exitedClientIndex) + " has left the chat!");
+               // dos.writeUTF(LoginFormController.clientsNames.get(exitedClientIndex) + " has left the chat!");
                 dos.flush();
             } catch (IOException e) {
                 Platform.runLater(() -> {

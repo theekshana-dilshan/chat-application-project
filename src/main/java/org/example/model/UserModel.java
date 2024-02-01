@@ -1,44 +1,36 @@
 package org.example.model;
 
+import org.example.db.DBConnection;
 import org.example.dto.UserDTO;
-import org.example.util.CrudUtil;
 
 import java.io.InputStream;
-import java.sql.Blob;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class UserModel {
+
     public static boolean saveUser(UserDTO userDTO) throws SQLException {
-        String query = "INSERT INTO user VALUES (?,?,?)";
-        return CrudUtil.execute(query,userDTO.getEmployeeId(),userDTO.getUsername(),userDTO.getImage());
+        Blob imgBlob = new javax.sql.rowset.serial.SerialBlob(userDTO.getImage());
+
+        Connection connection= DBConnection.getInstance().getConnection();
+        String sql="INSERT INTO user(userId, username,image) VALUES (?,?,?)";
+        PreparedStatement pstm=connection.prepareStatement(sql);
+        pstm.setString(1, userDTO.getUserId());
+        pstm.setString(2, userDTO.getUsername());
+        pstm.setString(3, String.valueOf(imgBlob));
+
+        return pstm.executeUpdate() > 0;
     }
 
-    public static boolean existsUser(String employeeId, String username) throws SQLException {
-        String query = "SELECT employeeId FROM user WHERE employeeId = ? OR username = ?";
-        ResultSet rs = CrudUtil.execute(query,employeeId,username);
-        return rs.next();
-    }
+    public static boolean searchClient(String username) throws SQLException {
+        Connection connection= DBConnection.getInstance().getConnection();
+        String sql="SELECT * FROM user WHERE username=?";
+        PreparedStatement pstm=connection.prepareStatement(sql);
+        pstm.setString(1, username);
+        ResultSet resultSet = pstm.executeQuery();
 
-    public static boolean existsUser(String username) throws SQLException {
-        String query = "SELECT employeeId FROM user WHERE username = ?";
-        ResultSet rs = CrudUtil.execute(query,username);
-        return rs.next();
-    }
-
-    public static UserDTO getUser(String username) throws SQLException {
-        String query = "SELECT * FROM user WHERE username =?";
-        ResultSet rs = CrudUtil.execute(query,username);
-        if (rs.next()){
-            Blob blob = rs.getBlob(3);
-            InputStream inputStream;
-            if (blob != null) {
-                inputStream = blob.getBinaryStream();
-            }else {
-                inputStream = null;
-            }
-            return new UserDTO(rs.getString(1),rs.getString(2),inputStream);
+        while (resultSet.next()){
+            return true;
         }
-        return null;
+        return false;
     }
 }

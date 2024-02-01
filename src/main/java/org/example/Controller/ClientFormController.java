@@ -20,10 +20,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -37,9 +34,10 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 
-public class ClientFormController implements Initializable {
+public class ClientFormController  {
 
     @FXML
     private AnchorPane emojiPane;
@@ -65,140 +63,210 @@ public class ClientFormController implements Initializable {
     @FXML
     private Label lblUserName;
 
-    private Client client;
-
-    private static String name;
-
-    private File file;
-
-    public String msg;
-
-    public Socket socket;
-
-    public DataInputStream dis;
-
-    public DataOutputStream dos;
-
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        //emojiPane hide
-        emojiPane.setVisible(false);
+    @FXML
+    private ImageView imageButton;
 
 
-        //Detecting the height changes in the Vbox
-        ChangeListener<Number> heightListener = new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                //Check if the height has changed
-                if (newValue.doubleValue() != oldValue.doubleValue()) {
-                    //Scroll to the last point
-                    scrollPane.setVvalue(1.0);
-                }
-            }
-        };
 
-        // Bind the height of the VBox to the height of the ScrollPane's viewport
-        vBox.heightProperty().addListener(heightListener);
-        lblUserName.setText(LoginFormController.username);
-        setLabelWidth(lblUserName, lblUserName.getText());
+    public ImageView userImage;
+    private DataOutputStream dataOutputStream;
+    private DataInputStream dataInputStream;
+    Socket socket;
+
+
+    String name;
+    public void initialize() throws SQLException, ClassNotFoundException, IOException {
+        name = LoginFormController.name;
+        lblUserName.setText(name);
+
+
+
 
         new Thread(() -> {
-
             try {
-                socket = new Socket("localhost", 3000);
-                System.out.println("Client started");
+                socket = new Socket("localhost",5000);
+                dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                dataInputStream = new DataInputStream(socket.getInputStream());
+                dataOutputStream.writeUTF(name);
+                dataOutputStream.flush();
 
-                //adding name of client which join the chat
-                String joinMessage = "You have joined the chat";
-                Label textjoin = new Label(joinMessage);
-                textjoin.getStyleClass().add("join-text");
-                HBox hBoxJoin = new HBox();
-                hBoxJoin.getChildren().add(textjoin);
-                hBoxJoin.setAlignment(Pos.CENTER);
+                while (socket.isConnected()) {
+                    String type = dataInputStream.readUTF();
+                    if (type.equals("Message")) {
+                        //  System.out.println("sms");
+                        String sms = dataInputStream.readUTF();
+                        setReciveMessage(sms);
+                    }
+                    if (type.equals("image")) {
+                        //imge ek ganna
+                        String size = dataInputStream.readUTF();
+                        String user_name = dataInputStream.readUTF();
+                        System.out.println(user_name+":img send awa");
+                        byte[] blob = new byte[Integer.parseInt(size)];
+                        dataInputStream.readFully(blob);
 
-                Platform.runLater(() -> {
-                    vBox.getChildren().add(hBoxJoin);
-
-                    HBox hBox1 = new HBox();
-                    hBox1.setPadding(new Insets(5, 5, 5, 10));
-                    vBox.getChildren().add(hBox1);
-
-                    // Schedule a task to hide the HBox after 5 seconds
-                    Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(5), event -> {
-                        vBox.getChildren().remove(hBoxJoin);
-                    }));
-                    timeline.play();
-                });
-
-
-                while (true) {
-                    dis = new DataInputStream(socket.getInputStream());
-                    msg = dis.readUTF();
-
-                    //If the message was an image
-                    if (msg.equals("img")) {
-                        handleReceivedImage(dis);
-                    } else {
-                        //If it was a normal msg
-
-                        String serverMessage=msg;
-                        String[] parts = serverMessage.split(": ", 2);
-
-                        String senderName = null;
-                        String messageContent=null;
-
-                        if (parts.length == 2) {
-                            senderName = parts[0];
-                            messageContent = parts[1];
-                        }
-
-                        Text senderText = new Text(senderName+": ");
-                        senderText.setFill(Color.BLACK);
-
-                        HBox hBox = new HBox();
-                        Text text = new Text(messageContent);
-                        text.setFill(Color.color(0.934, 0.945, 0.996));
-                        text.setStyle("-fx-font-size: 14px;");
-                        text.setText(messageContent);
-
-                        TextFlow textFlow = new TextFlow(senderText,text);
-                        textFlow.setStyle("-fx-background-color: linear-gradient(to right, #a8adad, #858c8c);" +
-                                "-fx-font-size: 14px;"+
-                                "-fx-background-radius: 8px;");
-                        textFlow.setPadding(new Insets(5, 10, 8, 10));
-
-                        hBox.setAlignment(Pos.CENTER_LEFT);
-                        hBox.setPadding(new Insets(5, 5, 5, 10));
-                        hBox.getChildren().add(textFlow);
-
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                vBox.getChildren().add(hBox);
-                            }
-                        });
-
-
+                        setImg(blob,user_name);
                     }
                 }
-
             } catch (IOException e) {
-                Platform.runLater(() -> {
-                    Alert alert = new Alert(Alert.AlertType.ERROR, "Error while connecting to the server ! : " + e.getLocalizedMessage());
-                    /*Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
-                    alertStage.getScene().getStylesheets().add(getClass().getResource("/style/notification.css").toExternalForm());
-                    alert.showAndWait();*/
-                });
+                throw new RuntimeException(e);
             }
-
         }).start();
     }
+    private void setImg(byte[] blob, String user_name) {
+        Platform.runLater(() -> {
+            Label newLabel = new Label("  "+user_name+"  ");
+            newLabel.setStyle(
+                    "-fx-background-color: #325ee8;" +
+                            "-fx-border-radius: 10;" +
+                            "-fx-background-radius: 10;" +
+                            "-fx-font: bold 15px ;"
+            );
 
-    public void setLabelWidth(Label label, String text) {
-        Text textNode = new Text("Welcome : " + LoginFormController.username + " !");
-        textNode.setFont(label.getFont());
-        double textWidth = textNode.getLayoutBounds().getWidth();
-        label.setPrefWidth(textWidth);
+
+            Image image = new Image(new ByteArrayInputStream(blob));
+            ImageView imageView = new ImageView(image);
+            imageView.setFitWidth(100);
+            imageView.setFitHeight(100);
+            imageView.setLayoutX(5);
+            // Create a StackPane to hold the image and label
+            StackPane stackPane = new StackPane(imageView, newLabel);
+            stackPane.setAlignment(Pos.TOP_CENTER);
+
+            // Create a new HBox to hold the StackPane
+            HBox hBox = new HBox(stackPane);
+            hBox.setStyle("-fx-padding:20;");
+            hBox.setAlignment(Pos.CENTER_LEFT);  // Align to the right
+
+            // Assuming VBox is your target VBox and is accessible within the scope
+            vBox.getChildren().add(hBox);
+            scrollPane.setVvalue(1.0);
+        });
+    }
+
+
+
+    private void setReciveMessage(String message) {
+        Platform.runLater(() -> {
+            Label newLabel = new Label("  " + message + "     ");
+            newLabel.setStyle(
+                    "-fx-background-color: #527bff;" +
+                            "-fx-border-radius: 15;" +
+                            "-fx-background-radius: 15;" +
+                            "-fx-font-size: 15;" +
+                            "-fx-font: bold;" +
+                            "  font-weight: 900;"
+            );
+
+            HBox hBox = new HBox(newLabel);
+            hBox.setStyle("-fx-padding:20;");
+            hBox.setAlignment(Pos.CENTER_LEFT);  // Align to the right for the user's messages
+            vBox.getChildren().add(hBox);
+        });
+    }
+
+
+
+
+
+
+
+    public void btnSendOnAction(ActionEvent actionEvent) throws IOException {
+        String message = txtMessage.getText();
+        try {
+            dataOutputStream.writeUTF("Message");
+            dataOutputStream.writeUTF(name+" : "+message); // x:hi
+            dataOutputStream.flush();
+
+            Label label = new Label("  "+message+"  ");
+            label.setStyle( "-fx-background-color: #05d561;" +
+                    "-fx-border-radius: 15;" +
+                    "-fx-background-radius: 15;" +
+                    "-fx-font-size: 15;" +
+                    "-fx-font: bold;");
+            HBox hBox = new HBox(label);
+            hBox.setStyle("-fx-padding:20;");
+            hBox.setAlignment(Pos.CENTER_RIGHT);  // Align to the right for the user's messages
+            vBox.getChildren().add(hBox);
+            txtMessage.clear();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+
+
+
+
+    public void imageButton(ActionEvent actionEvent) {
+
+        FileChooser chooser = new FileChooser();
+        File file =chooser.showOpenDialog(root.getScene().getWindow());
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            if (fileInputStream!=null) {
+                Image image = new Image(fileInputStream);
+
+                byte[] blob = imagenToByte(image);
+                String path = file.getPath();
+                sendImg(blob);
+                System.out.println(path);
+                setMyImg(image);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void setMyImg(Image image) {
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(100);
+        imageView.setFitHeight(100);
+
+        // Create a new HBox to hold the image
+        HBox hBox = new HBox(imageView);
+        hBox.setStyle("-fx-padding:20;");
+        hBox.setAlignment(Pos.CENTER_RIGHT);  // Align to the right
+
+        // Assuming VBox is your target VBox and is accessible within the scope
+        vBox.getChildren().add(hBox);
+        scrollPane.setVvalue(1.0);
+    }
+
+
+
+
+
+    private void sendImg(byte[] blob) {
+        try {
+            dataOutputStream.writeUTF("image");
+
+            dataOutputStream.writeUTF(blob.length+"");
+            dataOutputStream.writeUTF(name);
+            dataOutputStream.write(blob);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+    private static byte[] imagenToByte(Image image) {
+        BufferedImage bufferimage = SwingFXUtils.fromFXImage(image, null);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(bufferimage, "jpg", output );
+            ImageIO.write(bufferimage, "png", output );
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        byte [] data = output.toByteArray();
+        return data;
     }
 
     @FXML
@@ -273,106 +341,7 @@ public class ClientFormController implements Initializable {
         }
     }
 
-    public void btnFileOnAction(ActionEvent actionEvent) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select the image");
-        FileChooser.ExtensionFilter imageFilter =
-                new FileChooser.ExtensionFilter("Image Files", "*.jpg", "*.jpeg", "*.png", "*.gif");
-        fileChooser.getExtensionFilters().add(imageFilter);
-        file = fileChooser.showOpenDialog(txtMessage.getScene().getWindow());
-    }
 
-    public void btnSendOnAction(ActionEvent actionEvent) {
-        if (txtMessage.getText().isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Cannot send empty messages !  ");
-            Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
-            alertStage.getScene().getStylesheets().add(getClass().getResource("/style/notification.css").toExternalForm());
-            alert.showAndWait();
-
-        } else {
-            new Thread(() -> {
-
-                HBox hBox = new HBox();
-
-                Text text = new Text(txtMessage.getText());
-                text.setFill(Color.color(0.934, 0.945, 0.996));
-                text.setStyle("-fx-font-size: 14px;");
-                text.setText(txtMessage.getText());
-
-                Text senderText = new Text("me :  ");
-                senderText.setFill(Color.BLACK);
-
-                TextFlow textFlow = new TextFlow(senderText,text);
-                textFlow.setStyle("-fx-color: rgb(239, 242, 255);" +
-                        "-fx-background-color: linear-gradient(to right, #83e7eb, #3948ed);" +
-                        "-fx-font-size: 14px;" +
-                        "-fx-background-radius: 6px;");
-                textFlow.setPadding(new Insets(5, 10, 8, 10));
-
-                hBox.setAlignment(Pos.CENTER_RIGHT);
-                hBox.setPadding(new Insets(5, 5, 5, 10));
-                hBox.getChildren().add(textFlow);
-
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        vBox.getChildren().add(hBox);
-                    }
-                });
-                try {
-                    dos = new DataOutputStream(socket.getOutputStream());
-                    dos.writeUTF(txtMessage.getText());
-                    dos.flush();
-                    txtMessage.clear();
-                } catch (IOException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR, "Error while sending the message ! : " + e.getLocalizedMessage());
-                    Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
-                    alertStage.getScene().getStylesheets().add(getClass().getResource("/style/notification.css").toExternalForm());
-                    alert.showAndWait();
-                }
-            }).start();
-        }
-    }
-
-    private void handleReceivedImage(DataInputStream dis) {
-        try {
-            //The dis.read() method reads the length of the image data
-            int imageDataLength = dis.readInt();
-            //Creating a byte array using the length of the image data
-            byte[] imageData = new byte[imageDataLength];
-            dis.readFully(imageData);
-
-            //Converting the byte array to a buffered image object
-            ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
-            BufferedImage bufferedImage = ImageIO.read(bais);
-
-            //Convert BufferedImage to JavaFX Image
-            Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-
-            // Create an ImageView with the Image
-            ImageView imageView = new ImageView(image);
-            imageView.setPreserveRatio(true);
-            imageView.setFitWidth(200);
-            imageView.setFitHeight(200);
-
-            //ADD A scroll pane to the image container
-            ScrollPane scrollPane = new ScrollPane();
-            scrollPane.setContent(imageView);
-
-            //Append the ImageView to the imageContainer
-            Platform.runLater(() -> vBox.getChildren().add(imageView));
-        } catch (IOException e) {
-            Platform.runLater(() -> {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Error while handling the received image: " + e.getLocalizedMessage());
-
-                Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
-                alertStage.getScene().getStylesheets().add(getClass().getResource("/style/notification.css").toExternalForm());
-                alert.showAndWait();
-            });
-        }
-    }
-
-    public static void addLabel(String sender,String messageFromServer, VBox vBox) {
-
+    public void imageHandler(MouseEvent mouseEvent) {
     }
 }

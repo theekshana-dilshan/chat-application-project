@@ -1,9 +1,11 @@
 package org.example.Controller;
 
 import com.jfoenix.controls.JFXTextField;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -12,7 +14,10 @@ import javafx.stage.FileChooser;
 import org.example.dto.UserDTO;
 import org.example.model.UserModel;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.sql.Blob;
 import java.sql.SQLException;
 
 public class SignUpFormController {
@@ -51,38 +56,20 @@ public class SignUpFormController {
 
     @FXML
     void btnSignUpOnAction(MouseEvent event) {
-        /*if (!(txtUserID.getText().isEmpty() || txtUserName.getText().isEmpty())) {
-            try {
-                String employeeId = txtUserID.getText();
-                String username = txtUserName.getText();
+        String userID = txtUserID.getText();
+        String userName = txtUserName.getText();
+        Image imgId = imgUser.getImage();
+        byte[] blob = imagenToByte(imgId);
 
-                boolean isExists = UserModel.existsUser(employeeId, username);
-                if (!isExists) {
-                    boolean isSaved;
-                    if (file != null) {
-                        InputStream inputStream = new FileInputStream(file);
-                        isSaved = UserModel.saveUser(new UserDTO(employeeId, username, inputStream));
-                    }else {
-                        isSaved = UserModel.saveUser(new UserDTO(employeeId, username, null));
-                    }
-                    if (isSaved) {
-                        *//*new SystemAlert(Alert.AlertType.CONFIRMATION,"Confirmation","Signup successfully completed!", ButtonType.OK).show();*//*
-                        System.out.println("Done");
-                        lblLogInOnAction(event);
-                    }
-                } else {
-                    *//*new SystemAlert(Alert.AlertType.WARNING,"Warning","Account is already exists",ButtonType.OK).show();*//*
-                    System.out.println("Error");
-                }
-            } catch (FileNotFoundException | SQLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }else {
-            *//*new SystemAlert(Alert.AlertType.WARNING,"Warning","Please fill all details",ButtonType.OK).show();*//*
-            System.out.println("Error 2");
-        }*/
+
+        try {
+            UserDTO userDTO = new UserDTO(userID, userName, blob);
+
+            UserModel.saveUser(userDTO);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @FXML
@@ -91,4 +78,16 @@ public class SignUpFormController {
         root.getChildren().add(FXMLLoader.load(getClass().getResource("/view/LoginForm.fxml")));
     }
 
+    public byte[] imagenToByte(Image imgId) {
+        BufferedImage bufferimage = SwingFXUtils.fromFXImage(imgId, null);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(bufferimage, "jpg", output );
+            ImageIO.write(bufferimage, "png", output );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte [] data = output.toByteArray();
+        return data;
+    }
 }

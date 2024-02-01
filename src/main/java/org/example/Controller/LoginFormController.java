@@ -6,12 +6,19 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.example.Controller.Client.ClientServer;
+import org.example.Server.Server;
+import org.example.model.UserModel;
 
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class LoginFormController {
@@ -24,23 +31,53 @@ public class LoginFormController {
 
     public static String username;
 
-    public static ArrayList<String> clientsNames = new ArrayList<>();
+    private ServerSocket serverSocket;
+
+    static String name;
+    public void initialize(){
+
+        try {
+            serverSocket = new ServerSocket(5000);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                    while (!serverSocket.isClosed()){
+
+                        Socket socket = serverSocket.accept();
+                        System.out.println("new user connected");
+
+                        ClientServer client = new ClientServer(socket);
+                    }
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        }).start();
+
+    }
 
     @FXML
-    void btnLoginOnAction(ActionEvent event) throws IOException {
-        setUsername();
+    void btnLoginOnAction(ActionEvent actionEventevent) throws IOException, SQLException {
+        name = txtUserName.getText();
 
-        Stage primaryStage = new Stage();
-        try {
-            primaryStage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/view/ClientForm.fxml"))));
-        } catch (IOException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Error while loading the client UI : " + e.getLocalizedMessage());
-//            Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
-        }
-//        primaryStage.getIcons().add(new Image("/image/chat.png"));
-        primaryStage.setTitle(username+" chat");
-        primaryStage.show();
-        primaryStage.setResizable(false);
+        AnchorPane anchorPane = FXMLLoader.load(getClass().getResource("/view/ClientForm.fxml"));
+        Scene scene = new Scene(anchorPane);
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.setTitle(name);
+        stage.centerOnScreen();
+        stage.show();
+
+        txtUserName.clear();
     }
 
     @FXML

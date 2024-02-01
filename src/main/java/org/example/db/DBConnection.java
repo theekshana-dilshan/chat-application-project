@@ -11,7 +11,7 @@ public class DBConnection {
 
     private Connection connection;
 
-    String url ="jdbc:mysql://localhost:3306/chat_application";
+    String url ="jdbc:mysql://localhost:3306/chat_applicaton";
     String userName = "root";
     String password = "Dilsh@1234";
 

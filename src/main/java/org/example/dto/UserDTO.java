@@ -10,7 +10,7 @@ import java.io.InputStream;
 @Setter
 @ToString
 public class UserDTO {
-    private String employeeId;
+    private String userId;
     private String username;
-    private InputStream image;
+    private byte[] image;
 }
