@@ -76,6 +76,9 @@ public class ClientFormController  {
 
     String name;
     public void initialize() throws SQLException, ClassNotFoundException, IOException {
+        emojiPane.setVisible(false);
+        supRoot.setVisible(false);
+
         name = LoginFormController.name;
         lblUserName.setText(name);
 
@@ -117,17 +120,19 @@ public class ClientFormController  {
         Platform.runLater(() -> {
             Label newLabel = new Label("  "+user_name+"  ");
             newLabel.setStyle(
-                    "-fx-background-color: #325ee8;" +
-                            "-fx-border-radius: 10;" +
-                            "-fx-background-radius: 10;" +
-                            "-fx-font: bold 15px ;"
+                    "-fx-background-color: linear-gradient(to right, #da7a7a, #fa5252);" +
+                            "-fx-border-radius: 15;" +
+                            "-fx-background-radius: 15;" +
+                            "-fx-font-size: 15;" +
+                            "-fx-font: bold;" +
+                            "  font-weight: 900;"
             );
 
 
             Image image = new Image(new ByteArrayInputStream(blob));
             ImageView imageView = new ImageView(image);
-            imageView.setFitWidth(100);
-            imageView.setFitHeight(100);
+            imageView.setFitWidth(200);
+            imageView.setFitHeight(200);
             imageView.setLayoutX(5);
             // Create a StackPane to hold the image and label
             StackPane stackPane = new StackPane(imageView, newLabel);
@@ -144,13 +149,11 @@ public class ClientFormController  {
         });
     }
 
-
-
     private void setReciveMessage(String message) {
         Platform.runLater(() -> {
             Label newLabel = new Label("  " + message + "     ");
             newLabel.setStyle(
-                    "-fx-background-color: #527bff;" +
+                    "-fx-background-color: #da7a7a;" +
                             "-fx-border-radius: 15;" +
                             "-fx-background-radius: 15;" +
                             "-fx-font-size: 15;" +
@@ -165,12 +168,6 @@ public class ClientFormController  {
         });
     }
 
-
-
-
-
-
-
     public void btnSendOnAction(ActionEvent actionEvent) throws IOException {
         String message = txtMessage.getText();
         try {
@@ -179,11 +176,14 @@ public class ClientFormController  {
             dataOutputStream.flush();
 
             Label label = new Label("  "+message+"  ");
-            label.setStyle( "-fx-background-color: #05d561;" +
-                    "-fx-border-radius: 15;" +
-                    "-fx-background-radius: 15;" +
-                    "-fx-font-size: 15;" +
-                    "-fx-font: bold;");
+            label.setStyle(
+                    "-fx-background-color:  #fa5252;" +
+                            "-fx-border-radius: 15;" +
+                            "-fx-background-radius: 15;" +
+                            "-fx-font-size: 15;" +
+                            "-fx-font: bold;" +
+                            "  font-weight: 900;"
+            );
             HBox hBox = new HBox(label);
             hBox.setStyle("-fx-padding:20;");
             hBox.setAlignment(Pos.CENTER_RIGHT);  // Align to the right for the user's messages
@@ -193,12 +193,6 @@ public class ClientFormController  {
             throw new RuntimeException(e);
         }
     }
-
-
-
-
-
-
 
     public void imageButton(ActionEvent actionEvent) {
 
@@ -221,6 +215,7 @@ public class ClientFormController  {
             e.printStackTrace();
         }
     }
+
     private void setMyImg(Image image) {
         ImageView imageView = new ImageView(image);
         imageView.setFitWidth(100);
@@ -236,10 +231,6 @@ public class ClientFormController  {
         scrollPane.setVvalue(1.0);
     }
 
-
-
-
-
     private void sendImg(byte[] blob) {
         try {
             dataOutputStream.writeUTF("image");
@@ -251,9 +242,6 @@ public class ClientFormController  {
             e.printStackTrace();
         }
     }
-
-
-
 
     private static byte[] imagenToByte(Image image) {
         BufferedImage bufferimage = SwingFXUtils.fromFXImage(image, null);
@@ -339,9 +327,5 @@ public class ClientFormController  {
             imgWallpaper.setImage(new Image(file.toURI().toString()));
             supRoot.setVisible(!supRoot.isVisible());
         }
-    }
-
-
-    public void imageHandler(MouseEvent mouseEvent) {
     }
 }
