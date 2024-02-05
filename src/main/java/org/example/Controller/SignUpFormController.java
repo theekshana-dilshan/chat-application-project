@@ -36,6 +36,12 @@ public class SignUpFormController {
 
     private File file;
 
+    public static int count2 = 0;
+
+    public void initialize(){
+        count2 = 1;
+    }
+
     @FXML
     void btnAddPhotoOnAction(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
@@ -55,18 +61,21 @@ public class SignUpFormController {
     }
 
     @FXML
-    void btnSignUpOnAction(MouseEvent event) {
+    void btnSignUpOnAction(ActionEvent event) {
         String userID = txtUserID.getText();
         String userName = txtUserName.getText();
         Image imgId = imgUser.getImage();
         byte[] blob = imagenToByte(imgId);
 
-
         try {
             UserDTO userDTO = new UserDTO(userID, userName, blob);
-
-            UserModel.saveUser(userDTO);
-
+            boolean b = UserModel.saveUser(userDTO);
+            if(b){
+                System.out.println("Succes");
+            }else{
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Sign up failed");
+                alert.showAndWait();
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -76,7 +76,7 @@
             <JFXButton layoutX="254.0" layoutY="7.0" onAction="#imageButton" prefHeight="26.0" prefWidth="26.0" text=" " />
          </children>
       </Pane>
-      <ImageView fitHeight="56.0" fitWidth="56.0" layoutX="308.0" layoutY="6.0">
+      <ImageView fx:id="imgUserImage" fitHeight="56.0" fitWidth="56.0" layoutX="308.0" layoutY="6.0">
          <image>
             <Image url="@../img/360_F_619264680_x2PBdGLF54sFe7kTBtAvZnPyXgvaRw0Y.jpg" />
          </image>

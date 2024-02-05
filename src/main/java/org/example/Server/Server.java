@@ -20,8 +20,8 @@ public class Server {
 
     public static void startServer() {
         System.out.println("Server started");
-        new Thread(() -> {
 
+        new Thread(() -> {
             try {
                 ServerSocket ss = new ServerSocket(3000);
                 while (true) {
@@ -43,18 +43,13 @@ public class Server {
 
                     //Handling each client from a separate thread
                     handleClient(socket);
-
-
                 }
             } catch (IOException e) {
                 Platform.runLater(() -> {
 //                    System.out.println("Error while starting the server : " + e.getLocalizedMessage());
                 });
             }
-
         }).start();
-
-
     }
 
     public static void handleClient(Socket socket) {
@@ -74,20 +69,11 @@ public class Server {
                     } else {
                         sendMsgToOthers(clientMsg, socket);
                     }
-
-
                 }
-
-
             } catch (IOException e) {
                 throw new RuntimeException(e);
-
-
             }
-
-
         }).start();
-
     }
 
 
@@ -144,7 +130,6 @@ public class Server {
                 if (s.getPort() == socket.getPort()) {
                     //Avoid sending the message to the sender.
                     continue;
-
                 }
                 DataOutputStream dos = new DataOutputStream(s.getOutputStream());
                 //Since socketArray index == clientsNames array client name index
@@ -159,9 +144,7 @@ public class Server {
                     alert.showAndWait();
                 });
             }
-
         }
-
     }
 
     public static void handleExitedClient(int exitedClientIndex) {

@@ -31,16 +31,20 @@ public class LoginFormController {
 
     public static String username;
 
+    public static int count = 0;
+
     private ServerSocket serverSocket;
 
     static String name;
     public void initialize(){
+        count = SignUpFormController.count2;
 
-        try {
-            serverSocket = new ServerSocket(5000);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if(count == 0) {
+            try {
+                serverSocket = new ServerSocket(5000);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         new Thread(new Runnable() {
@@ -69,15 +73,21 @@ public class LoginFormController {
     void btnLoginOnAction(ActionEvent actionEventevent) throws IOException, SQLException {
         name = txtUserName.getText();
 
-        AnchorPane anchorPane = FXMLLoader.load(getClass().getResource("/view/ClientForm.fxml"));
-        Scene scene = new Scene(anchorPane);
-        Stage stage = new Stage();
-        stage.setScene(scene);
-        stage.setTitle(name);
-        stage.centerOnScreen();
-        stage.show();
+        boolean b = UserModel.searchUser(name);
+        if(b){
+            AnchorPane anchorPane = FXMLLoader.load(getClass().getResource("/view/ClientForm.fxml"));
+            Scene scene = new Scene(anchorPane);
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.setTitle(name);
+            stage.centerOnScreen();
+            stage.show();
 
-        txtUserName.clear();
+            txtUserName.clear();
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "User name not found");
+            alert.showAndWait();
+        }
     }
 
     @FXML

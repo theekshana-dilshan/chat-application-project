@@ -27,6 +27,8 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.example.dto.UserDTO;
+import org.example.model.UserModel;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -66,6 +68,9 @@ public class ClientFormController  {
     @FXML
     private ImageView imageButton;
 
+    @FXML
+    private ImageView imgUserImage;
+
 
 
     public ImageView userImage;
@@ -82,8 +87,12 @@ public class ClientFormController  {
         name = LoginFormController.name;
         lblUserName.setText(name);
 
+        UserDTO userDTO = UserModel.getImage(name);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(userDTO.getImage());
 
-
+        // Use the input stream to create an Image
+        Image image = new Image(byteArrayInputStream);
+        imgUserImage.setImage(image);
 
         new Thread(() -> {
             try {
@@ -120,9 +129,9 @@ public class ClientFormController  {
         Platform.runLater(() -> {
             Label newLabel = new Label("  "+user_name+"  ");
             newLabel.setStyle(
-                    "-fx-background-color: linear-gradient(to right, #da7a7a, #fa5252);" +
-                            "-fx-border-radius: 15;" +
-                            "-fx-background-radius: 15;" +
+                    "-fx-background-color: #da7a7a;" +
+                            "-fx-border-radius: 10;" +
+                            "-fx-background-radius: 10;" +
                             "-fx-font-size: 15;" +
                             "-fx-font: bold;" +
                             "  font-weight: 900;"
@@ -154,8 +163,8 @@ public class ClientFormController  {
             Label newLabel = new Label("  " + message + "     ");
             newLabel.setStyle(
                     "-fx-background-color: #da7a7a;" +
-                            "-fx-border-radius: 15;" +
-                            "-fx-background-radius: 15;" +
+                            "-fx-border-radius: 10;" +
+                            "-fx-background-radius: 10;" +
                             "-fx-font-size: 15;" +
                             "-fx-font: bold;" +
                             "  font-weight: 900;"
@@ -178,8 +187,8 @@ public class ClientFormController  {
             Label label = new Label("  "+message+"  ");
             label.setStyle(
                     "-fx-background-color:  #fa5252;" +
-                            "-fx-border-radius: 15;" +
-                            "-fx-background-radius: 15;" +
+                            "-fx-border-radius: 10;" +
+                            "-fx-background-radius: 10;" +
                             "-fx-font-size: 15;" +
                             "-fx-font: bold;" +
                             "  font-weight: 900;"
@@ -250,7 +259,6 @@ public class ClientFormController  {
             ImageIO.write(bufferimage, "jpg", output );
             ImageIO.write(bufferimage, "png", output );
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         byte [] data = output.toByteArray();
@@ -259,8 +267,7 @@ public class ClientFormController  {
 
     @FXML
     void imgBackOnAction(MouseEvent event) throws IOException {
-        root.getChildren().clear();
-        root.getChildren().add(FXMLLoader.load(getClass().getResource("/view/LoginForm.fxml")));
+        ((Stage) root.getScene().getWindow()).close();
     }
 
     @FXML
@@ -326,6 +333,17 @@ public class ClientFormController  {
         if (file != null) {
             imgWallpaper.setImage(new Image(file.toURI().toString()));
             supRoot.setVisible(!supRoot.isVisible());
+        }
+    }
+
+    public void setUserImage(){
+        String username = lblUserName.getText();
+
+        try {
+            UserDTO userDTO = UserModel.getImage(username);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }
